@@ -1,0 +1,11 @@
+{
+  "config.displayMode.description": "Display mode: 'api' for pay-per-use (today/month), 'subscription' for fixed plan (5h/7d utilization %)",
+  "config.displayMode.enumDescription.api": "Pay-per-use mode: shows today's and this month's costs",
+  "config.displayMode.enumDescription.subscription": "Fixed subscription mode: shows 5-hour and 7-day utilization percentages",
+  "config.refreshIntervalSeconds.description": "Data refresh interval for the status bar (seconds). In subscription mode, setting this too low may cause rate limit errors (429). 300 seconds or more is recommended.",
+  "config.statusBarAlignment.description": "Status bar display position",
+  "config.statusBarPriority.description": "Status bar display priority (higher value = further from center; more right for right alignment, more left for left alignment)",
+  "config.enabled.description": "Enable/disable status bar display",
+  "config.ccusagePath.description": "Path to the ccusage binary. Leave empty to search PATH (requires: npm install -g ccusage).",
+  "command.refresh.title": "Claude Usage: Refresh Now"
+}

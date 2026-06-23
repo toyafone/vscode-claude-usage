@@ -1,0 +1,11 @@
+{
+  "config.displayMode.description": "表示モード: 'api'（従量課金・今日/今月）または 'subscription'（定額・5時間/7日の使用率%）",
+  "config.displayMode.enumDescription.api": "API 従量課金モード: 今日と今月の利用料金を表示",
+  "config.displayMode.enumDescription.subscription": "定額サブスクリプションモード: 5時間・7日間の使用率（%）を表示",
+  "config.refreshIntervalSeconds.description": "ステータスバーのデータ更新間隔（秒）。subscription モードで小さい値を設定するとレート制限エラー（429）が発生する場合があります。300秒以上を推奨します。",
+  "config.statusBarAlignment.description": "ステータスバーの表示位置",
+  "config.statusBarPriority.description": "ステータスバーの表示優先度（数値が大きいほど端寄り：右寄せなら右端、左寄せなら左端に近づく）",
+  "config.enabled.description": "ステータスバー表示の有効/無効",
+  "config.ccusagePath.description": "ccusage バイナリへのパス。空欄の場合は PATH から検索します（npm install -g ccusage でインストール済みであること）。",
+  "command.refresh.title": "Claude Usage: 今すぐ更新"
+}

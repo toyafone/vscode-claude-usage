@@ -1,0 +1,119 @@
+{
+  "name": "claude-usage-live",
+  "displayName": "Claude Usage Live",
+  "description": "Show Claude Code usage cost in the status bar",
+  "version": "1.0.0",
+  "publisher": "toyafone",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "anthropic",
+    "ai",
+    "usage",
+    "cost",
+    "token",
+    "status-bar"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toyafone/vscode-claude-usage.git"
+  },
+  "bugs": {
+    "url": "https://github.com/toyafone/vscode-claude-usage/issues"
+  },
+  "homepage": "https://github.com/toyafone/vscode-claude-usage#readme",
+  "main": "./out/extension.js",
+  "l10n": "./l10n",
+  "contributes": {
+    "configuration": {
+      "title": "Claude Usage Live",
+      "properties": {
+        "claudeUsage.displayMode": {
+          "type": "string",
+          "enum": [
+            "api",
+            "subscription"
+          ],
+          "enumDescriptions": [
+            "%config.displayMode.enumDescription.api%",
+            "%config.displayMode.enumDescription.subscription%"
+          ],
+          "default": "api",
+          "description": "%config.displayMode.description%"
+        },
+        "claudeUsage.refreshIntervalSeconds": {
+          "type": "number",
+          "default": 300,
+          "minimum": 10,
+          "maximum": 3600,
+          "description": "%config.refreshIntervalSeconds.description%"
+        },
+        "claudeUsage.statusBarAlignment": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right"
+          ],
+          "default": "right",
+          "description": "%config.statusBarAlignment.description%"
+        },
+        "claudeUsage.statusBarPriority": {
+          "type": "number",
+          "default": 100,
+          "description": "%config.statusBarPriority.description%"
+        },
+        "claudeUsage.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.enabled.description%"
+        },
+        "claudeUsage.ccusagePath": {
+          "type": "string",
+          "default": "",
+          "description": "%config.ccusagePath.description%"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "claudeUsage.refresh",
+        "title": "%command.refresh.title%"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "overrides": {
+    "diff": "^9.0.0",
+    "serialize-javascript": "^7.0.5"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/sinon": "^21.0.1",
+    "@types/vscode": "^1.80.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.3",
+    "sinon": "^22.0.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1"
+  },
+  "dependencies": {}
+}
