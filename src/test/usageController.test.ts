@@ -218,9 +218,9 @@ suite('UsageController', () => {
 
     test('ccusage not found → sets error state and shows notification once', async () => {
         const showWarningStub = sinon.stub(vscode.window, 'showWarningMessage').resolves(undefined as any);
-        const factory: UsageServiceFactory = () => { throw new CcusageNotFoundError('not found'); };
+        sinon.stub(UsageService.prototype, 'fetchUsage').rejects(new CcusageNotFoundError('not found'));
 
-        const controller = makeController(factory);
+        const controller = makeController();
         controller.start();
         await drainMicrotasks();
 
@@ -231,9 +231,9 @@ suite('UsageController', () => {
 
     test('ccusage not found → notification not shown again on second fetch', async () => {
         const showWarningStub = sinon.stub(vscode.window, 'showWarningMessage').resolves(undefined as any);
-        const factory: UsageServiceFactory = () => { throw new CcusageNotFoundError('not found'); };
+        sinon.stub(UsageService.prototype, 'fetchUsage').rejects(new CcusageNotFoundError('not found'));
 
-        const controller = makeController(factory);
+        const controller = makeController();
         controller.start();
         await drainMicrotasks();
 
@@ -249,9 +249,9 @@ suite('UsageController', () => {
         sinon.stub(vscode.window, 'showWarningMessage').resolves(installLabel as any);
         const fakeTerminal = { show: sinon.stub(), sendText: sinon.stub() };
         sinon.stub(vscode.window, 'createTerminal').returns(fakeTerminal as any);
-        const factory: UsageServiceFactory = () => { throw new CcusageNotFoundError('not found'); };
+        sinon.stub(UsageService.prototype, 'fetchUsage').rejects(new CcusageNotFoundError('not found'));
 
-        const controller = makeController(factory);
+        const controller = makeController();
         controller.start();
         await drainMicrotasks();
         await Promise.resolve(); // let the .then() on showWarningMessage run
@@ -265,9 +265,9 @@ suite('UsageController', () => {
         const setPathLabel = vscode.l10n.t('Set Path');
         sinon.stub(vscode.window, 'showWarningMessage').resolves(setPathLabel as any);
         const executeCommandStub = sinon.stub(vscode.commands, 'executeCommand').resolves();
-        const factory: UsageServiceFactory = () => { throw new CcusageNotFoundError('not found'); };
+        sinon.stub(UsageService.prototype, 'fetchUsage').rejects(new CcusageNotFoundError('not found'));
 
-        const controller = makeController(factory);
+        const controller = makeController();
         controller.start();
         await drainMicrotasks();
         await Promise.resolve();
@@ -281,9 +281,9 @@ suite('UsageController', () => {
 
     test('ccusagePath config change → invalidates service and resets notification flag', async () => {
         const showWarningStub = sinon.stub(vscode.window, 'showWarningMessage').resolves(undefined as any);
-        const factory: UsageServiceFactory = () => { throw new CcusageNotFoundError('not found'); };
+        sinon.stub(UsageService.prototype, 'fetchUsage').rejects(new CcusageNotFoundError('not found'));
 
-        const controller = makeController(factory);
+        const controller = makeController();
         controller.start();
         await drainMicrotasks();
         assert.strictEqual(showWarningStub.callCount, 1, 'first notification shown');

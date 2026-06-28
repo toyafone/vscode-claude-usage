@@ -12,6 +12,7 @@ import {
     EmptyDataError,
     CredentialsError,
     RateLimitError,
+    CcusageNotFoundError,
 } from './types';
 
 const execFileAsync = promisify(execFile);
@@ -71,6 +72,11 @@ export class UsageService {
     }
 
     private async fetchApiUsage(): Promise<ApiUsageSummary> {
+        if (!this.bin) {
+            throw new CcusageNotFoundError(
+                vscode.l10n.t('ccusage not found. Install it with: npm install -g ccusage')
+            );
+        }
         const [dailyData, monthlyData] = await Promise.all([
             this.runCcusage(['claude', 'daily', '--json']),
             this.runCcusage(['claude', 'monthly', '--json']),

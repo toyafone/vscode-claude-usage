@@ -2,7 +2,7 @@
   "name": "claude-usage-live",
   "displayName": "Claude Usage Live",
   "description": "Show Claude Code usage cost in the status bar",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "toyafone",
   "engines": {
     "vscode": "^1.80.0"

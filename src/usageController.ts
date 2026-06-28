@@ -97,20 +97,7 @@ export class UsageController implements vscode.Disposable {
         if (!this.statusBarController) { return; }
         this.stopRetryTimer();
 
-        let service: UsageService;
-        try {
-            service = this.getOrCreateService();
-        } catch (err: unknown) {
-            if (err instanceof CcusageNotFoundError) {
-                this.statusBarController.setError(vscode.l10n.t('ccusage not found'));
-                if (!this.notifiedNotFound) {
-                    this.notifiedNotFound = true;
-                    this.showCcusageNotFoundNotification();
-                }
-                return;
-            }
-            throw err;
-        }
+        const service = this.getOrCreateService();
 
         try {
             const summary = await service.fetchUsage(this.configManager.getDisplayMode());
@@ -118,6 +105,12 @@ export class UsageController implements vscode.Disposable {
         } catch (err: unknown) {
             if (err instanceof EmptyDataError) {
                 this.statusBarController.setNoData(err.message);
+            } else if (err instanceof CcusageNotFoundError) {
+                this.statusBarController.setError(vscode.l10n.t('ccusage not found'));
+                if (!this.notifiedNotFound) {
+                    this.notifiedNotFound = true;
+                    this.showCcusageNotFoundNotification();
+                }
             } else {
                 this.statusBarController.setError(
                     err instanceof Error ? err.message : String(err)

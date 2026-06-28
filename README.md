@@ -1,5 +1,7 @@
 # Claude Usage Live
 
+[![CI](https://github.com/toyafone/vscode-claude-usage/actions/workflows/ci.yml/badge.svg)](https://github.com/toyafone/vscode-claude-usage/actions/workflows/ci.yml)
+
 Monitor your Claude Code usage in the VS Code status bar.
 
 ## Features
@@ -30,12 +32,12 @@ Run **Claude Usage: Refresh Now** from the Command Palette (`Ctrl+Shift+P` / `Cm
 
 - VS Code 1.120.0 or later
 - [Claude Code](https://claude.ai/code) installed
+
+**API mode** additionally requires:
 - `ccusage` installed globally:
   ```
   npm install -g ccusage
   ```
-
-**API mode** additionally requires:
 - Claude Code must have been used at least once (log files must exist under `~/.claude/projects/`)
 
 **Subscription mode** additionally requires:
