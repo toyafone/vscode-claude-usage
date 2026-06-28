@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { UsageService, resolveBin } from '../usageService';
-import { ApiUsageSummary, SubscriptionUsageSummary, EmptyDataError, CredentialsError, RateLimitError } from '../types';
+import { ApiUsageSummary, SubscriptionUsageSummary, EmptyDataError, CredentialsError, RateLimitError, CcusageNotFoundError } from '../types';
 
 const FAKE_BIN = '/fake/bin/ccusage';
 const FAKE_TOKEN = 'sk-ant-oat01-fake';
@@ -76,6 +76,11 @@ suite('UsageService', () => {
                 (err: Error) => err.message.includes('npm install')
             );
         });
+
+        test("empty bin → throws CcusageNotFoundError", async () => {
+            const svc = new UsageService('', execStub as any);
+            await assert.rejects(svc.fetchUsage('api'), CcusageNotFoundError);
+        });
     });
 
     suite('Subscription mode', () => {
@@ -149,6 +154,13 @@ suite('UsageService', () => {
                 service.fetchUsage('subscription'),
                 (err: Error) => err.message.includes('Network error')
             );
+        });
+
+        test("empty bin → subscription mode still succeeds", async () => {
+            const svc = new UsageService('', execStub as any, () => FAKE_CREDS);
+            stubOk({ five_hour: { utilization: 20, resets_at: RESET_5H }, seven_day: null });
+            const r = await svc.fetchUsage('subscription') as SubscriptionUsageSummary;
+            assert.strictEqual(r.fiveHour.utilization, 20);
         });
     });
 

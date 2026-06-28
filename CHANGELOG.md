@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.0.1] - 2026-06-28
+
+### Fixed
+- Subscription mode no longer shows "ccusage not found" error when ccusage is not installed
+
 ## [1.0.0] - 2026-06-22
 
 ### Added
