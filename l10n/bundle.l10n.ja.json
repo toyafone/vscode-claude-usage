@@ -22,10 +22,12 @@
   "ccusage exited with an error: {0}": "ccusage がエラーで終了しました: {0}",
   "Failed to parse ccusage output: {0}": "ccusage の出力の解析に失敗しました: {0}",
   "No usage data returned from API.": "API からの使用データが見つかりません。",
-  "Claude Code credentials not found. Please run `claude login`.": "認証情報が見つかりません。`claude login` を実行してください。",
+  "Could not read the Keychain (denied, locked, or timed out). Unlock the Keychain, or run `claude login` again.": "Keychain を読み取れませんでした（拒否、ロック、またはタイムアウト）。Keychain のロックを解除するか、`claude login` を再度実行してください。",
+  "Claude Code credentials not found in Keychain or {0}/.credentials.json. Please run `claude login`.": "Keychain または {0}/.credentials.json に認証情報が見つかりません。`claude login` を実行してください。",
+  "Claude Code credentials not found at {0}/.credentials.json. Please run `claude login`.": "{0}/.credentials.json に認証情報が見つかりません。`claude login` を実行してください。",
   "Request timed out (10s). Please try again.": "リクエストがタイムアウトしました（10秒）。再度お試しください。",
   "Network error: {0}": "ネットワークエラー: {0}",
-  "Authentication failed. Please run `claude login` again.": "認証に失敗しました。`claude login` を再度実行してください。",
+  "Authentication failed. Start Claude Code to refresh it, or run `claude login` again.": "認証に失敗しました。Claude Code を起動してトークンを更新するか、`claude login` を再度実行してください。",
   "API request failed with status {0}.": "API リクエストが失敗しました（ステータス: {0}）。",
   "Rate limit exceeded. Will retry at next refresh interval.": "レート制限に達しました。次の更新タイミングで再試行します。"
 }

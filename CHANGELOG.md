@@ -1,5 +1,18 @@
 # Change Log
 
+## [1.1.0] - 2026-11-25
+
+### Added
+- Subscription mode now works on macOS: credentials are read from the Keychain (item `Claude Code-credentials`), falling back to `~/.claude/.credentials.json`
+- Support for `CLAUDE_CONFIG_DIR` (credentials file location and the matching Keychain item)
+
+### Changed
+- Credentials are re-read on every refresh, so a token refreshed by Claude Code is picked up automatically
+- Clearer authentication errors: the message now shows where credentials were looked up, distinguishes "Keychain could not be read" from "not found", and suggests starting Claude Code when the token has expired
+
+### Fixed
+- Subscription mode showed "Claude Usage Live: Error" ("Claude Code credentials not found") on macOS (#2)
+
 ## [1.0.1] - 2026-06-28
 
 ### Fixed
