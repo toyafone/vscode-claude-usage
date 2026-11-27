@@ -71,3 +71,7 @@ Run **Claude Usage: Refresh Now** from the Command Palette (`Ctrl+Shift+P` / `Cm
 | Command | Description |
 |---|---|
 | `Claude Usage: Refresh Now` | Immediately fetch and display the latest usage data |
+
+## Development
+
+See [docs/architecture.md](docs/architecture.md) for how the extension is structured and why. Press `F5` to start an Extension Development Host, and run `npm test` to run the tests.
