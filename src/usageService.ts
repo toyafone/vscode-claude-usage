@@ -13,13 +13,12 @@ import {
     RateLimitError,
     CcusageNotFoundError,
     ExecFn,
-    ReadFileFn,
 } from './types';
-import { CredentialsOptions, readClaudeCredentials } from './credentials';
+import { readClaudeCredentials } from './credentials';
 
 const execFileAsync = promisify(execFile);
 
-export type { ExecFn, ReadFileFn } from './types';
+export type TokenProvider = () => Promise<string>;
 
 const OAUTH_USAGE_URL = 'https://api.anthropic.com/api/oauth/usage';
 
@@ -51,20 +50,17 @@ export class UsageService {
     private readonly bin: string;
     private readonly useShell: boolean;
     private readonly execFn: ExecFn;
-    private readonly readFileFn: ReadFileFn;
-    private readonly credentialsOptions: Omit<CredentialsOptions, 'execFn' | 'readFileFn'>;
+    private readonly tokenProvider: TokenProvider;
 
     constructor(
         bin: string,
         execFn?: ExecFn,
-        readFileFn?: ReadFileFn,
-        credentialsOptions: Omit<CredentialsOptions, 'execFn' | 'readFileFn'> = {}
+        tokenProvider: TokenProvider = () => readClaudeCredentials()
     ) {
         this.bin = bin;
         this.useShell = process.platform === 'win32' && bin.endsWith('.cmd');
         this.execFn = execFn ?? ((file, args, opts) => execFileAsync(file, args, opts));
-        this.readFileFn = readFileFn ?? ((p, enc) => fs.readFileSync(p, enc));
-        this.credentialsOptions = credentialsOptions;
+        this.tokenProvider = tokenProvider;
     }
 
     async fetchUsage(mode: DisplayMode): Promise<UsageSummary> {
@@ -104,11 +100,7 @@ export class UsageService {
     }
 
     private async fetchSubscriptionUsage(): Promise<SubscriptionUsageSummary> {
-        const token = await readClaudeCredentials({
-            ...this.credentialsOptions,
-            execFn: this.execFn,
-            readFileFn: this.readFileFn,
-        });
+        const token = await this.tokenProvider();
         const data = await this.callOAuthApi(token);
 
         if (!data.five_hour) {

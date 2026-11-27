@@ -32,5 +32,3 @@ export type ExecFn = (
     args: string[],
     opts: object
 ) => Promise<{ stdout: string }>;
-
-export type ReadFileFn = (path: string, encoding: BufferEncoding) => string;

@@ -164,8 +164,8 @@ suite('readClaudeCredentials', () => {
         });
 
         test('NFC and NFD spellings of /tmp/café give the same service name', () => {
-            const nfc = '/tmp/café';
-            const nfd = '/tmp/café';
+            const nfc = '/tmp/caf\u00e9';   // é (U+00E9)
+            const nfd = '/tmp/cafe\u0301';  // e + combining acute accent (U+0301)
             assert.notStrictEqual(nfc, nfd);
             assert.strictEqual(keychainServiceName({ CLAUDE_CONFIG_DIR: nfc }), 'Claude Code-credentials-0873cca0');
             assert.strictEqual(keychainServiceName({ CLAUDE_CONFIG_DIR: nfd }), 'Claude Code-credentials-0873cca0');

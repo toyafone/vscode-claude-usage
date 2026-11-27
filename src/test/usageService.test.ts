@@ -5,12 +5,9 @@ import { ApiUsageSummary, SubscriptionUsageSummary, EmptyDataError, CredentialsE
 
 const FAKE_BIN = '/fake/bin/ccusage';
 const FAKE_TOKEN = 'sk-ant-oat01-fake';
-const FAKE_CREDS = JSON.stringify({ claudeAiOauth: { accessToken: FAKE_TOKEN } });
+const fakeTokenProvider = () => Promise.resolve(FAKE_TOKEN);
 const RESET_5H = '2026-06-20T02:39:59.000Z';
 const RESET_7D = '2026-06-23T04:59:59.000Z';
-// The execStub in these tests serves ccusage. Pin the platform so that credential
-// reads never reach `security`, even when the tests run on macOS.
-const LINUX = { platform: 'linux' as const, env: {}, homedir: '/home/tester' };
 
 suite('UsageService', () => {
     let execStub: sinon.SinonStub;
@@ -90,7 +87,7 @@ suite('UsageService', () => {
         let fetchStub: sinon.SinonStub;
 
         setup(() => {
-            service = new UsageService(FAKE_BIN, execStub as any, () => FAKE_CREDS, LINUX);
+            service = new UsageService(FAKE_BIN, execStub as any, fakeTokenProvider);
             fetchStub = sinon.stub(globalThis, 'fetch');
         });
 
@@ -120,11 +117,6 @@ suite('UsageService', () => {
             assert.strictEqual(r.sevenDay, null);
         });
 
-        test("missing credentials → throws CredentialsError", async () => {
-            service = new UsageService(FAKE_BIN, execStub as any, () => { throw new Error('ENOENT'); }, LINUX);
-            await assert.rejects(service.fetchUsage('subscription'), CredentialsError);
-        });
-
         test("401 response → throws CredentialsError with the refresh hint, no retry", async () => {
             fetchStub.resolves({ ok: false, status: 401, json: async () => ({}) } as Response);
             await assert.rejects(
@@ -134,8 +126,9 @@ suite('UsageService', () => {
             assert.strictEqual(fetchStub.callCount, 1);
         });
 
-        test("credentials unavailable → API is not called, error propagates", async () => {
-            service = new UsageService(FAKE_BIN, execStub as any, () => { throw new Error('ENOENT'); }, LINUX);
+        test("credentials unavailable → CredentialsError propagates and the API is not called", async () => {
+            service = new UsageService(FAKE_BIN, execStub as any,
+                () => Promise.reject(new CredentialsError('no credentials')));
             await assert.rejects(service.fetchUsage('subscription'), CredentialsError);
             assert.ok(fetchStub.notCalled);
         });
@@ -178,7 +171,7 @@ suite('UsageService', () => {
         });
 
         test("empty bin → subscription mode still succeeds", async () => {
-            const svc = new UsageService('', execStub as any, () => FAKE_CREDS, LINUX);
+            const svc = new UsageService('', execStub as any, fakeTokenProvider);
             stubOk({ five_hour: { utilization: 20, resets_at: RESET_5H }, seven_day: null });
             const r = await svc.fetchUsage('subscription') as SubscriptionUsageSummary;
             assert.strictEqual(r.fiveHour.utilization, 20);

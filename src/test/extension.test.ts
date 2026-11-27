@@ -9,7 +9,6 @@ import { EmptyDataError } from '../types';
 import { activate } from '../extension';
 
 const TODAY = new Date().toLocaleDateString('en-CA');
-const FAKE_CREDS = JSON.stringify({ claudeAiOauth: { accessToken: 'sk-ant-oat01-fake' } });
 const RESET_5H = '2026-06-20T02:39:59.000Z';
 const RESET_7D = '2026-06-23T04:59:59.000Z';
 
@@ -39,9 +38,9 @@ suite('Integration', () => {
         return { subscriptions: [] } as any;
     }
 
-    async function runPipeline(mode: 'api' | 'subscription', readFileFn?: (p: string, e: BufferEncoding) => string): Promise<{ text: string; tooltip: vscode.MarkdownString | undefined }> {
+    async function runPipeline(mode: 'api' | 'subscription', tokenProvider?: () => Promise<string>): Promise<{ text: string; tooltip: vscode.MarkdownString | undefined }> {
         configGetStub.withArgs('displayMode', 'api').returns(mode);
-        const service = new UsageService('/fake/bin', execStub as any, readFileFn);
+        const service = new UsageService('/fake/bin', execStub as any, tokenProvider);
         const controller = new StatusBarController(vscode.StatusBarAlignment.Right, 100, new TooltipBuilder());
         try {
             const summary = await service.fetchUsage(new ConfigManager().getDisplayMode());
@@ -84,7 +83,7 @@ suite('Integration', () => {
                 seven_day: { utilization: 13, resets_at: RESET_7D },
             }),
         } as Response);
-        const { text } = await runPipeline('subscription', () => FAKE_CREDS);
+        const { text } = await runPipeline('subscription', () => Promise.resolve('sk-ant-oat01-fake'));
         assert.ok(text.includes('10%'), `text: ${text}`);
         assert.ok(text.includes('13%'), `text: ${text}`);
     });

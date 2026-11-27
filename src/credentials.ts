@@ -5,7 +5,7 @@ import * as path from 'path';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
-import { CredentialsError, ExecFn, KeychainAccessError, ReadFileFn } from './types';
+import { CredentialsError, ExecFn, KeychainAccessError } from './types';
 
 const execFileAsync = promisify(execFile);
 
@@ -15,6 +15,8 @@ const KEYCHAIN_TIMEOUT_MS = 10000;
 const KEYCHAIN_ITEM_NOT_FOUND = 44;
 const FALLBACK_ACCOUNT = 'claude-code-user';
 const SAFE_ACCOUNT = /^[a-zA-Z0-9._-]+$/;
+
+export type ReadFileFn = (path: string, encoding: BufferEncoding) => string;
 
 export interface CredentialsOptions {
     platform?: NodeJS.Platform;
