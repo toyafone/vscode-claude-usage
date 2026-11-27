@@ -5,7 +5,7 @@ import { ApiUsageSummary, SubscriptionUsageSummary, EmptyDataError, CredentialsE
 
 const FAKE_BIN = '/fake/bin/ccusage';
 const FAKE_TOKEN = 'sk-ant-oat01-fake';
-const FAKE_CREDS = JSON.stringify({ claudeAiOauth: { accessToken: FAKE_TOKEN } });
+const fakeTokenProvider = () => Promise.resolve(FAKE_TOKEN);
 const RESET_5H = '2026-06-20T02:39:59.000Z';
 const RESET_7D = '2026-06-23T04:59:59.000Z';
 
@@ -87,7 +87,7 @@ suite('UsageService', () => {
         let fetchStub: sinon.SinonStub;
 
         setup(() => {
-            service = new UsageService(FAKE_BIN, execStub as any, () => FAKE_CREDS);
+            service = new UsageService(FAKE_BIN, execStub as any, fakeTokenProvider);
             fetchStub = sinon.stub(globalThis, 'fetch');
         });
 
@@ -117,14 +117,28 @@ suite('UsageService', () => {
             assert.strictEqual(r.sevenDay, null);
         });
 
-        test("missing credentials → throws CredentialsError", async () => {
-            service = new UsageService(FAKE_BIN, execStub as any, () => { throw new Error('ENOENT'); });
-            await assert.rejects(service.fetchUsage('subscription'), CredentialsError);
+        test("401 response → throws CredentialsError with the refresh hint, no retry", async () => {
+            fetchStub.resolves({ ok: false, status: 401, json: async () => ({}) } as Response);
+            await assert.rejects(
+                service.fetchUsage('subscription'),
+                (err: Error) => err instanceof CredentialsError && err.message.includes('Start Claude Code')
+            );
+            assert.strictEqual(fetchStub.callCount, 1);
         });
 
-        test("401 response → throws CredentialsError", async () => {
-            fetchStub.resolves({ ok: false, status: 401, json: async () => ({}) } as Response);
+        test("credentials unavailable → CredentialsError propagates and the API is not called", async () => {
+            service = new UsageService(FAKE_BIN, execStub as any,
+                () => Promise.reject(new CredentialsError('no credentials')));
             await assert.rejects(service.fetchUsage('subscription'), CredentialsError);
+            assert.ok(fetchStub.notCalled);
+        });
+
+        test("calls the API with the Bearer token read from credentials", async () => {
+            stubOk({ five_hour: { utilization: 7, resets_at: RESET_5H }, seven_day: null });
+            const r = await service.fetchUsage('subscription') as SubscriptionUsageSummary;
+            assert.strictEqual(r.fiveHour.utilization, 7);
+            const headers = fetchStub.firstCall.args[1].headers as Record<string, string>;
+            assert.strictEqual(headers['Authorization'], `Bearer ${FAKE_TOKEN}`);
         });
 
         test("network timeout → throws with timed out message", async () => {
@@ -157,7 +171,7 @@ suite('UsageService', () => {
         });
 
         test("empty bin → subscription mode still succeeds", async () => {
-            const svc = new UsageService('', execStub as any, () => FAKE_CREDS);
+            const svc = new UsageService('', execStub as any, fakeTokenProvider);
             stubOk({ five_hour: { utilization: 20, resets_at: RESET_5H }, seven_day: null });
             const r = await svc.fetchUsage('subscription') as SubscriptionUsageSummary;
             assert.strictEqual(r.fiveHour.utilization, 20);

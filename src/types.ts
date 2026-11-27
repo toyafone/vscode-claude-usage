@@ -23,5 +23,12 @@ export type UsageSummary = ApiUsageSummary | SubscriptionUsageSummary;
 
 export class EmptyDataError extends Error {}
 export class CredentialsError extends Error {}
+export class KeychainAccessError extends CredentialsError {}
 export class RateLimitError extends Error {}
 export class CcusageNotFoundError extends Error {}
+
+export type ExecFn = (
+    file: string,
+    args: string[],
+    opts: object
+) => Promise<{ stdout: string }>;

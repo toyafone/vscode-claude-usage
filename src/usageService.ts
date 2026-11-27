@@ -1,7 +1,6 @@
 import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
 import {
@@ -13,17 +12,13 @@ import {
     CredentialsError,
     RateLimitError,
     CcusageNotFoundError,
+    ExecFn,
 } from './types';
+import { readClaudeCredentials } from './credentials';
 
 const execFileAsync = promisify(execFile);
 
-export type ExecFn = (
-    file: string,
-    args: string[],
-    opts: object
-) => Promise<{ stdout: string }>;
-
-export type ReadFileFn = (path: string, encoding: BufferEncoding) => string;
+export type TokenProvider = () => Promise<string>;
 
 const OAUTH_USAGE_URL = 'https://api.anthropic.com/api/oauth/usage';
 
@@ -55,13 +50,17 @@ export class UsageService {
     private readonly bin: string;
     private readonly useShell: boolean;
     private readonly execFn: ExecFn;
-    private readonly readFileFn: ReadFileFn;
+    private readonly tokenProvider: TokenProvider;
 
-    constructor(bin: string, execFn?: ExecFn, readFileFn?: ReadFileFn) {
+    constructor(
+        bin: string,
+        execFn?: ExecFn,
+        tokenProvider: TokenProvider = () => readClaudeCredentials()
+    ) {
         this.bin = bin;
         this.useShell = process.platform === 'win32' && bin.endsWith('.cmd');
         this.execFn = execFn ?? ((file, args, opts) => execFileAsync(file, args, opts));
-        this.readFileFn = readFileFn ?? ((p, enc) => fs.readFileSync(p, enc));
+        this.tokenProvider = tokenProvider;
     }
 
     async fetchUsage(mode: DisplayMode): Promise<UsageSummary> {
@@ -101,7 +100,7 @@ export class UsageService {
     }
 
     private async fetchSubscriptionUsage(): Promise<SubscriptionUsageSummary> {
-        const token = this.readAccessToken();
+        const token = await this.tokenProvider();
         const data = await this.callOAuthApi(token);
 
         if (!data.five_hour) {
@@ -115,21 +114,6 @@ export class UsageService {
             sevenDay: data.seven_day ? toWindow(data.seven_day) : null,
             lastUpdated: new Date(),
         };
-    }
-
-    private readAccessToken(): string {
-        const credPath = path.join(os.homedir(), '.claude', '.credentials.json');
-        try {
-            const content = this.readFileFn(credPath, 'utf-8');
-            const creds = JSON.parse(content) as { claudeAiOauth?: { accessToken?: string } };
-            const token = creds?.claudeAiOauth?.accessToken;
-            if (!token) { throw new Error('missing'); }
-            return token;
-        } catch {
-            throw new CredentialsError(
-                vscode.l10n.t('Claude Code credentials not found. Please run `claude login`.')
-            );
-        }
     }
 
     private async callOAuthApi(token: string): Promise<OAuthUsageResponse> {
@@ -151,7 +135,7 @@ export class UsageService {
 
         if (response.status === 401) {
             throw new CredentialsError(
-                vscode.l10n.t('Authentication failed. Please run `claude login` again.')
+                vscode.l10n.t('Authentication failed. Start Claude Code to refresh it, or run `claude login` again.')
             );
         }
         if (response.status === 429) {
